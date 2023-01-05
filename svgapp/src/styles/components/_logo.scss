@@ -1,0 +1,32 @@
+#logo {   
+    align-items: center;
+    width : 120px;
+    height : 120px;
+    @media screen and (max-width: 768px) {
+        width : 130px;
+        height : 100px;
+        
+    }
+    //logo image
+    .logo_img {object-fit: cover;
+        position: relative;
+        top: 0px;
+        left: 0px;
+    width:100px;
+    height: 100px;
+        cursor: pointer;
+    
+    border-radius: 15px 0 15px 15px;
+
+   }
+   button{
+    position: relative;
+    top: 0px;
+    left: 0px; 
+    background-color: #86bd24;
+    border: none;
+    border-radius: 15px 0 15px 15px;
+    cursor: pointer;
+    padding:0px;
+    }
+    }

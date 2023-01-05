@@ -1,0 +1,14 @@
+.connection-button {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #000;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    height: 30px;
+    margin: 5px;
+    padding: 5px;
+    text-align: center;
+    width: 100px;
+}

@@ -1,0 +1,28 @@
+<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+ <title>Rooms</title>
+
+ <g>
+  <title>Layer 1</title>
+  <rect stroke-width="3" id="svg_1" height="200" width="800" y="0" x="0" stroke="#000" fill="#fff"/>
+  <path id="svg_9" d="m785.5,170.5" opacity="NaN" stroke-width="2" stroke="#000" fill="#fff"/>
+  <path id="svg_10" d="m784.5,169.5" opacity="NaN" stroke-width="2" stroke="#000" fill="#fff"/>
+  <rect stroke="#000" id="svg_4" height="88" width="106.00001" y="2.5" x="2.5" stroke-width="2" fill="#fff"/>
+  <rect id="svg_5" height="28" width="377" y="170.5" x="421.5" stroke-width="2" stroke="#000" fill="#fff"/>
+  <rect id="svg_6" height="29" width="377" y="169.5" x="1.5" stroke-width="2" stroke="#000" fill="#fff"/>
+  <line id="svg_7" y2="175.5" x2="379.5" y1="175.5" x1="420.5" stroke-width="2" stroke="#000" fill="none"/>
+  <line id="svg_8" y2="188.5" x2="379.5" y1="188.5" x1="422.5" stroke-width="2" stroke="#000" fill="none"/>
+  <rect stroke="#000" id="svg_13" height="88" width="106.00001" y="2.5" x="110.5" stroke-width="2" fill="#fff"/>
+  <rect stroke="#000" id="svg_14" height="88" width="106.00001" y="2.5" x="217.5" stroke-width="2" fill="#fff"/>
+  <rect stroke="#000" id="svg_15" height="88" width="106.00001" y="2.5" x="324.5" stroke-width="2" fill="#fff"/>
+  <rect stroke="#000" id="svg_16" height="88" width="106.00001" y="2.5" x="432.5" stroke-width="2" fill="#fff"/>
+  <rect stroke="#000" id="svg_17" height="88" width="106.00001" y="2.5" x="540.5" stroke-width="2" fill="#fff"/>
+  <rect stroke="#000" id="svg_18" height="88" width="106.00001" y="2.5" x="648.5" stroke-width="2" fill="#fff"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_21" y="54.5" x="40.5" stroke-width="0" stroke="#000" fill="#000000">01</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_24" y="55.5" x="147.5" stroke-width="0" stroke="#000" fill="#000000">02</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_25" y="54.5" x="255.5" stroke-width="0" stroke="#000" fill="#000000">03</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_26" y="57.5" x="360.5" stroke-width="0" stroke="#000" fill="#000000">04</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_27" y="55.5" x="470.5" stroke-width="0" stroke="#000" fill="#000000">05</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_28" y="52.5" x="572.5" stroke-width="0" stroke="#000" fill="#000000">06</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="24" id="svg_29" y="52.5" x="682.5" stroke-width="0" stroke="#000" fill="#000000">07</text>
+ </g>
+</svg>
