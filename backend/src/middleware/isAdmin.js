@@ -9,7 +9,6 @@ const admin = asyncHandler(async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    console.log("token found");
     //On enleve le mot Bearer du token puis on le decode//
     try {
       token = req.headers.authorization.split(" ")[1];
