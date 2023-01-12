@@ -1,85 +1,74 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { check, validationResult } = require("express-validator");
 const Room = require("../database/model/roomModel");
 const protect = require("../middleware/IsConnected");
 const admin = require("../middleware/IsAdmin");
 
 // @route   POST api/rooms/create
-// @desc    Create a room
+// @desc    Créer une salle
 // @access  Private
-router.post(
-  "/create",
-  [
-    check("nom", "Please add a name").not().isEmpty(),
-    check("code", "Please add a code").not().isEmpty(),
-    check("etage", "Please add a floor").not().isEmpty(),
-    check("capacite", "Please add a capacity").not().isEmpty(),
-    check("equipements", "Please add equipments").not().isEmpty(),
-  ],
-  protect,
-  admin,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const { nom, code, etage, capacite, equipements } = req.body;
-    try {
-      let room = await Room.findOne({ nom });
-      if (room) {
-        return res
-          .status(400)
-          .json({ error: "La salle " + nom + " existe déjà." });
-      }
-      let emplacement = await Room.findOne({
-        $and: [{ etage: etage }, { code: code }],
-      });
-      if (emplacement) {
-        return res.status(400).json({
-          error: "L'emplacement existe déjà.",
-          emplacement:
-            " Etage: " + etage + " Code: " + code + " Nom: " + emplacement.nom,
-        });
-      }
-      room = new Room({
-        nom,
-        code,
-        etage,
-        capacite,
-        equipements,
-      });
-      await room.save();
-      res.json(room);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server Error");
-    }
-  }
-);
+router.post("/create", protect, admin, async (req, res) => {
+  // On récupère les données du formulaire //
 
-// @route   GET api/rooms
-// @desc    Get all rooms
-// @access  Private
-router.get("/", protect, async (req, res) => {
+  const { nom, code, etage, capacite, equipements } = req.body;
   try {
-    // Récupération des salles avec les réservations //
-    const rooms = await Room.find().populate("reservations");
-    // Réponse en json des salles //
-    res.json(rooms);
+    // On vérifie que les champs ne sont pas vides //
 
+    if (!nom || !code || !etage || !capacite || !equipements) {
+      return res
+        .status(400)
+        .json({ error: "Veuillez remplir tous les champs." });
+    }
+    // On vérifie que la salle n'existe pas déjà //
+    let room = await Room.findOne({ nom });
+    if (room) {
+      return res
+        .status(400)
+        .json({ error: "La salle " + nom + " existe déjà." });
+    }
+    // On vérifie que l'emplacement n'existe pas déjà //
+    let emplacement = await Room.findOne({
+      $and: [{ etage: etage }, { code: code }],
+    });
+    if (emplacement) {
+      return res.status(400).json({
+        error: "L'emplacement existe déjà.",
+        emplacement:
+          " Etage: " + etage + " Code: " + code + " Nom: " + emplacement.nom,
+      });
+
+      // On crée la salle //
+    }
+    room = new Room({
+      nom,
+      code,
+      etage,
+      capacite,
+      equipements,
+    });
+    await room.save();
+    res.json(room);
   } catch (err) {
-    // S'il y a une erreur, on affiche l'erreur dans la console //
-    // et on renvoie un message d'erreur avec le code 500 //
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 });
 
+// @route   GET api/rooms
+// @desc    Récupérer toutes les salles
+// @access  Private
+router.get("/", protect, async (req, res) => {
+  try {
+    // Récupération des salles avec les réservations //
+    const rooms = await Room.find().populate("reservations");
+    res.json(rooms);
+  } catch (err) {
+    res.status(500).send("Server Error");
+  }
+});
+
 // @route   GET api/rooms/:id
-// @desc    Get room by ID
+// @desc    Récupérer une salle par son id
 // @access  Private
 router.get("/:id", protect, async (req, res) => {
   try {
@@ -98,10 +87,10 @@ router.get("/:id", protect, async (req, res) => {
 });
 
 // @route   PUT api/rooms/:id
-// @desc    Update room
+// @desc    Modifier une salle
 // @access  Private
 router.put("/:id", protect, admin, async (req, res) => {
-  //update only if room emplacement is not taken and room name is not taken
+  // On récupère les données du formulaire //
   const { nom, code, etage, capacite, equipements } = req.body;
   const roomFields = {};
   if (nom) roomFields.nom = nom;
@@ -110,11 +99,15 @@ router.put("/:id", protect, admin, async (req, res) => {
   if (capacite) roomFields.capacite = capacite;
   if (equipements) roomFields.equipements = equipements;
   try {
+    // On vérifie que les champs ne sont pas vides //
     let room = await Room.findById(req.params.id);
+
+    // On vérifie que la salle n'existe pas déjà //
     if (!room) return res.status(404).json({ msg: "Salle non trouvée" });
     let emplacement = await Room.findOne({
       $and: [{ etage: etage }, { code: code }],
     });
+    // On vérifie que l'emplacement n'existe pas déjà //
     if (emplacement) {
       return res.status(400).json({
         error: "L'emplacement existe déjà.",
@@ -122,6 +115,7 @@ router.put("/:id", protect, admin, async (req, res) => {
           " Etage: " + etage + " Code: " + code + " Nom: " + emplacement.nom,
       });
     }
+    // On modifie la salle //
     room = await Room.findOneAndUpdate(
       { _id: req.params.id },
       { $set: roomFields },
@@ -135,7 +129,7 @@ router.put("/:id", protect, admin, async (req, res) => {
 });
 
 // @route   DELETE api/rooms/:id
-// @desc    Delete room
+// @desc    Supprimer une salle
 // @access  Private
 router.delete("/:id", protect, admin, async (req, res) => {
   try {

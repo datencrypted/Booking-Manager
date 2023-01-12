@@ -8,130 +8,139 @@ const protect = require("../middleware/IsConnected");
 const admin = require("../middleware/IsAdmin");
 
 // @route   POST api/auth/register
-// @desc    Register a user
+// @desc    Enregistrement d'un utilisateur
 // @access  Public
-router.post(
-  "/register",
-  [
-    check("email", "Please include a valid email").isEmail(),
-    check(
-      "password",
-      "Please enter a password with 6 or more characters"
-    ).isLength({ min: 6 }),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const { email, password, civility, firstName, lastName, role, telephone } =
-      req.body;
-    try {
-      let user = await User.findOne({ email });
-      if (user) {
-        return res.status(400).json({ error: "L'utilisateur existe déjà." });
-      }
-      user = new User({
-        telephone,
-        civility,
-        firstName,
-        lastName,
-        email,
-        password,
-        role,
-      });
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
-      await user.save();
-      const payload = {
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          civility: user.civility,
-          role: user.role,
-          email: user.email,
-        },
-      };
-      jwt.sign(
-        payload,
-        process.env.JWT_SECRET,
-        {
-          expiresIn: process.env.JWT_EXPIRES_IN,
-        },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ errors: err });
-    }
+router.post("/register", async (req, res) => {
+  // On récupère les données du formulaire //
+
+  const { email, password, civility, firstName, lastName, role, telephone } =
+    req.body;
+
+  // On vérifie que les champs ne sont pas vides //
+
+  if (!email || !password || !civility || !firstName || !lastName || !role) {
+    return res.status(400).json({ error: "Veuillez remplir tous les champs." });
   }
-);
+
+  // On vérifie que l'utilisateur n'existe pas déjà //
+
+  try {
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ error: "L'utilisateur existe déjà." });
+    }
+
+    // On hash le mot de passe //
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // On crée l'utilisateur //
+
+    user = new User({
+      telephone,
+      civility,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role,
+    });
+    await user.save();
+
+    // On génère le token //
+
+    const payload = {
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        civility: user.civility,
+        role: user.role,
+        email: user.email,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      },
+      (err, token) => {
+        if (err) throw err;
+        res.json({ token });
+      }
+    );
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ errors: err });
+  }
+});
 
 // @route   POST api/auth/login
-// @desc    Authenticate user & get token
+// @desc    Connexion d'un utilisateur
 // @access  Public
-router.post(
-  "/login",
-  [
-    check("email", "Please include a valid email").isEmail(),
-    check("password", "Password is required").exists(),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const { email, password } = req.body;
-    try {
-      let user = await User.findOne({ email });
-      if (!user) {
-        return res
-          .status(400)
-          .json({ error: "Cette adresse email n'existe pas." });
-      }
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ error: "Informations de connexion invalides." });
-      }
+router.post("/login", async (req, res) => {
+  // On récupère les données du formulaire //
+  const { email, password } = req.body;
 
-      const payload = {
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          civility: user.civility,
-          role: user.role,
-          email: user.email,
-        },
-      };
-      jwt.sign(
-        payload,
-        process.env.JWT_SECRET,
-        {
-          expiresIn: process.env.JWT_EXPIRES_IN,
-        },
-        (err, token) => {
-          if (err) throw err;
-          res.status(200).json({ token });
-        }
-      );
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Erreur provenant du serveur");
-    }
+  // On vérifie que les champs ne sont pas vides //
+  if (!email || !password) {
+    return res.status(400).json({ error: "Veuillez remplir tous les champs." });
   }
-);
+
+  // On vérifie que l'utilisateur existe //
+  try {
+    let user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "Cette adresse email n'existe pas." });
+    }
+
+    // On vérifie que le mot de passe est correct //
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ error: "Informations de connexion invalides." });
+    }
+
+    // On génère le token //
+
+    const payload = {
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        civility: user.civility,
+        role: user.role,
+        email: user.email,
+      },
+    };
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      },
+      (err, token) => {
+        if (err) throw err;
+        res.status(200).json({ token });
+      }
+    );
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Erreur provenant du serveur");
+  }
+});
 
 // @route   GET api/auth/users
-// @desc    Get all users
+// @desc    Récupération de tous les utilisateurs
 // @access  Private
 router.get("/users", protect, async (req, res) => {
+  // On récupère tous les utilisateurs depuis la base de données sans sélectionner le mot de passe //
   try {
     const users = await User.find().select("-password");
     res.json(users);
@@ -142,7 +151,7 @@ router.get("/users", protect, async (req, res) => {
 });
 
 //@route    DELETE api/auth/user/:id
-//@desc     Delete a user
+//@desc     Supprimer un utilisateur
 //@access   Private
 router.delete("/user/:id", admin, async (req, res) => {
   try {
@@ -157,7 +166,7 @@ router.delete("/user/:id", admin, async (req, res) => {
 });
 
 // @route   GET api/auth/user/:id
-// @desc    Get user by ID
+// @desc    Récupération d'un utilisateur par son id
 // @access  Private
 router.get("/user/:id", protect, async (req, res) => {
   try {
@@ -171,9 +180,11 @@ router.get("/user/:id", protect, async (req, res) => {
 });
 
 // @route   PUT api/auth/user/:id
-// @desc    Update user
+// @desc    Modification d'un utilisateur
 // @access  Private
 router.put("/user/:id", admin, async (req, res) => {
+  // On récupère les données du formulaire //
+
   const { civility, firstName, lastName, email, role, password, telephone } =
     req.body;
   const userFields = {};
@@ -184,10 +195,14 @@ router.put("/user/:id", admin, async (req, res) => {
   if (password) userFields.password = password;
   if (role) userFields.role = role;
   if (telephone) userFields.telephone = telephone;
+
+  // On vérifie que l'utilisateur existe //
   try {
-    console.log(userFields);
     let user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: "Utilisateur non trouvé" });
+
+    // On modifie l'utilisateur //
+
     user = await User.findByIdAndUpdate(
       req.params.id,
       { $set: userFields },

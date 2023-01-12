@@ -1,9 +1,8 @@
-//check jwt to see if user is admin
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../database/model/userModel");
 
-//check authorization bearer token so see the role of the user
+//VERIFICATION DU ROLE DE L'UTILISATEUR//
 const admin = asyncHandler(async (req, res, next) => {
   let token;
   if (
@@ -11,10 +10,17 @@ const admin = asyncHandler(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     console.log("token found");
+    //On enleve le mot Bearer du token puis on le decode//
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      //On cherche l'utilisateur dans la base de données//
+
       req.user = await User.findById(decoded.user.id).select("-password");
+
+      //On verifie si l'utilisateur est admin//
+
       if (req.user.role === "admin") {
         next();
       } else {
@@ -25,6 +31,7 @@ const admin = asyncHandler(async (req, res, next) => {
       res.status(401).json({ message: "wrong token : " + req.user });
     }
   }
+  //Si il n'y a pas de token renvoyer une erreur//
   if (!token) {
     res.status(401);
     throw new Error("Not authorized, no token");
